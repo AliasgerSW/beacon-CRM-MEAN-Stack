@@ -1,0 +1,677 @@
+<style>
+.content-device_block {
+    border: 1px solid grey;
+    margin: 2% auto;
+    min-height: 300px;
+    padding: 2% 0;
+    width: 98%;
+}
+
+.block_title_1 {
+    border-bottom: 1px solid;
+    font-size: 15px;
+    margin-bottom: 0;
+    padding: 3px 0;
+    text-align: center;
+}
+
+.block_title_2 {
+    border-bottom: 1px solid;
+    font-size: 12px;
+    margin-bottom: 0;
+    padding: 3px 0;
+    min-height: 40px;
+    word-wrap: break-word;
+}
+
+.block_title_3 {
+    border-bottom: 1px solid;
+    font-size: 16px;
+    margin-bottom: 0;
+    padding: 3px 0;
+    min-height: 40px;
+}
+
+.bcon-slect-title {
+    margin-bottom: 0;
+    /* padding: 7%   0;*/
+}
+
+.error_text {
+    background-color: #d9edf7;
+    border-radius: 3px;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 10px;
+    font-style: italic;
+    border: 1px solid #bce8f1;
+}
+
+.wait_text {
+    background-color: #d9edf7;
+    border-radius: 3px;
+    color: #31708f;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 10px;
+    font-style: italic;
+    border: 1px solid #bce8f1;
+}
+
+.bcon_selection_block_left {
+    border-radius: 3px;
+    /*width: 80%;*/
+    /*display: inline-block;*/
+    vertical-align: top;
+}
+
+.bcon_selection_block_right {
+    border-radius: 3px;
+    width: 100%;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.no-pad {
+    padding: 0 2px;
+}
+
+.bcon_selection_section {
+    padding: 0 0 24px 12px;
+}
+
+.push_btnn_block {
+    text-align: right;
+}
+
+.pad_box {
+    padding-top: 20px;
+}
+
+.btn-info {
+    width: 100%;
+}
+
+.btn.btn-info.btn-auto-width {
+    width: auto;
+}
+
+.btn_set {
+    margin-top: 20px;
+    width: 200px !important;
+}
+
+.error_text {
+    background-color: #f2dede;
+    border-color: #ebccd1;
+    color: #a94442;
+}
+
+#graphic-message .modal-footer {
+    text-align: center;
+}
+
+#graphic-message .modal-header {
+    background: #2E96F2;
+    color: #fff;
+}
+
+#graphic-message .modal-title {
+    font-weight: bold;
+}
+
+.input-icon.right textarea,
+.input-icon.right:input[type="text"] {
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    resize: none;
+}
+
+#graphic-message .modal-body > small {
+    font-weight: bold;
+    font-size: 14px;
+    color: #1D8DF1;
+}
+
+#graphic-message .close {
+    color: #fff;
+    font-size: 34px;
+    opacity: 1;
+}
+
+a.disabled {
+    background-color: #ffffff;
+    border-color: #dddddd;
+    color: #999999;
+    cursor: not-allowed;
+}
+
+.active-users {
+    color: #555299;
+    margin-bottom: 10px;
+}
+
+
+/*#uploadForm > input {
+    margin-bottom: 10px;
+}*/
+</style>
+<!--
+Author: Ranjithprabhu K
+Page Description: Dashboard Home page
+Date: 05 Jan 2016
+-->
+<!-- Content Header (Page header) -->
+<div ng-show="!connection" class="alert alert-danger">You're offline now. Please check your internet connection</div>
+<div ng-show="connection_msg" class="alert alert-success">Re-connected successfully</div>
+<section class="content-header">
+    <h1> Customers Visit History </h1>
+    <ol class="breadcrumb">
+        <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Customers Visit History</li>
+    </ol>
+</section>
+<div class="content-device_block">
+    <div class="container-fluid">
+        <div class="row" ng-show="deviceAnalysis && deviceAnalysis.length > 0">
+            <div class="col-md-12 active-users">
+                <div class="col-md-12"><strong>Number of active Devices at Stores: </strong></div>
+                <div class="col-md-3" ng-repeat="device in deviceAnalysis">
+                    {{ device._id.StoreName }} : {{ device.count }} {{ device.count > 1 && 'Users' || 'User' }}
+                </div>
+            </div>
+        </div>
+        <div class="wait_block" ng-if="InvalidInputs">
+            <p class="error_text" ng-show="!InvalidDateInputs">Please select Store and Date for getting list of device history.</p>
+            <p class="error_text" ng-show="InvalidDateInputs">End date must be greater or equal to start date.</p>
+        </div>
+        <div class="wait_block" ng-if="!Initialized">
+            <p class="wait_text">Please Wait...</p>
+        </div>
+        <div class="bcon_selection_section">
+            <div class="bcon_selection_block_left">
+                <div class="bcon_selection row">
+                    <div class="bcon_selection_left_1 col-md-2 no-pad">
+                        <div class="form-group">
+                            <div class="col-md-12 no-pad">
+                                <label class="bcon-slect-title">Select Store</label>
+                                <select class="form-control col-md-4" ng-model="selectedStore">
+                                    <option value="">Select Store</option>
+                                    <option ng-repeat="device in storeData | orderBy:StoreName" value="{{device._id}}">{{device.StoreName}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bcon_selection_left_1 col-md-2 no-pad">
+                        <div class="form-group">
+                            <div class="col-md-12 no-pad">
+                                <label class="bcon-slect-title">Select Section</label>
+                                <select class="form-control col-md-4" ng-show="!SectionInitialized">
+                                    <option value="">Please wait..</option>
+                                </select>
+                                <select class="form-control col-md-4" ng-model="selectedSection" ng-show="SectionInitialized">
+                                    <option value="">Select Section</option>
+                                    <option value="-1" ng-show="selectedStore">All Section</option>
+                                    <option ng-repeat="device in sectionInStore | orderBy:StoreName" value="{{device._id}}">{{device.SectionName}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bcon_selection_left_2 col-md-2">
+                        <div class="form-group">
+                            <div class="col-md-12 no-pad">
+                                <label class="bcon-slect-title">Select Beacon</label>
+                                <select class="form-control col-md-4" ng-show="!BeaconInitialized">
+                                    <option value="">Please wait..</option>
+                                </select>
+                                <select class="form-control col-md-4" ng-model="selectedBeacon" ng-show="BeaconInitialized">
+                                    <option value="" ng-show="selectedSection">All</option>
+                                    <option ng-repeat="device in beaconData | orderBy:BeaconKey" value="{{device.BeaconID}}">{{device.BeaconKey}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bcon_selection_left_3 col-md-6">
+                        <div class="form-group">
+                            <div class="col-md-5 no-pad">
+                                <label class="bcon-slect-title">Date From</label>
+                                <input type="text" ng-model="selectedDateFrom" id="datepickerFrom" class="datepicker form-control" readonly="readonly">
+                            </div>
+                            <div class="col-md-5 no-pad">
+                                <label class="bcon-slect-title">Date To</label>
+                                <input type="text" ng-model="selectedDateTo" id="datepickerTo" class="datepicker form-control" readonly="readonly">
+                            </div>
+                            <div class="col-md-2 no-pad">
+                                <div class="pad_box">
+                                    <button type="button" class="btn btn-info" ng-click="showData()">Show</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group">
+                <div class="col-md-4" style="padding-right: 0;">
+                    <!-- <label class="bcon-slect-title">Search</label> -->
+                    <label for="search">Search: <small style="color:purple;">(Please enter atleast 2 characters to get results)</small></label>
+                    <input type="text" ng-model="searchNameNumber" id="searchNameNumber" class="form-control" placeholder="Enter Name / Number" ng-enter="searchNameNumber.length != 1 && loadDataWithSearch()">
+                    <!-- <small style="color:purple;">Please enter atleast 2 characters to get results</small> -->
+                </div>
+                <div class="col-md-1" style="padding-left: 0px; padding-top: 25px;">
+                    <label class="bcon-slect-title"></label>
+                    <button type="button" class="btn btn-info" style="width: auto;" ng-click="loadDataWithSearch()" ng-disabled="searchNameNumber.length == 1"><i class="fa fa-search"></i></button>
+                </div>
+                <div class="col-md-6"></div>
+                <div class="col-md-1">
+                    <label class="bcon-slect-title"><small>Records/Page</small></label>
+                    <select ng-model="pageLimit" class="form-control">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+            </div>
+        </div>
+        <div class="row">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            <span ng-if="deviceDataCount == 1">1 Record</span>
+                            <span ng-if="deviceDataCount > 1">{{ deviceDataCount }} Records</span>
+                        </th>
+                        <th colspan="2"><small ng-if="deviceDataPageCount>1"><a href="javascript:;" ng-click="processSelectAllRecords()">
+                        <span ng-if="!selectAllRecord">Select All {{deviceDataCount }} records</span>
+                        <span ng-if="selectAllRecord">
+                            All {{deviceDataCount }} records are selected, Clear Selection
+                        </span>                        
+                        </a></small></th>
+                        <th colspan="4">
+                            <div class="bcon_selection_block_right">
+                                <div class="bcon_selection push_btnn_block row">
+                                    <div class="col-md-12">
+                                        <button type="button" class="btn btn-info btn_set" ng-click="checkClickedRecords()" data-toggle="modal" data-target="#graphic-message">Send Notification</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th><small><a href="javascript:;" ng-click="selectRecords()">Select</a>/
+            <a href="javascript:;" ng-click="unselectRecords()">Unselect</a></small></th>
+                        <th>Customer Name</th>
+                        <th>Mobile Number</th>
+                        <th>Stay Time</th>
+                        <th>Section</th>
+                        <th>Beacon</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="device in deviceData | orderBy:Distance " ng-if="deviceData.length > 0">
+                        <td>
+                            <input type="checkbox" value="{{ device.UniqueKey }}" ng-click="ShowSelectedTokens()" ng-model="device.checked">
+                        </td>
+                        <!-- <td>{{ device.DeviceID }}</td> -->
+                        <td>{{ device.DeviceName | titlecase }}</td>
+                        <td>{{ device.DevicePhone }}</td>
+                        <td>{{ device.StayTime }}</td>
+                        <td>{{ (device.SectionName && device.SectionName || "Not Alloted Yet") | titlecase }}</td>
+                        <td>{{ device.BeaconKey | titlecase }}</td>
+                        <td>
+                            <button type="button" class="btn btn-info btn-auto-width" data-toggle="modal" data-target="#search-history-detail" ng-click="deviceHistoryDetailCurrentPage = 1 && getDeviceSearchHistoryDetails(device.DeviceName, device.DevicePhone)"><i class="fa fa-search-plus" aria-hidden="true"></i> History
+                            </button>
+                            <button type="button" class="btn btn-info btn-auto-width" data-toggle="modal" data-target="#device-history-detail" ng-click="getDeviceHistoryDetails(device.DeviceName, device.BeaconKey, device.DevicePhone, device.BeaconID, device.SectionID)"><i class="fa fa-info-circle" aria-hidden="true"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr ng-if="!(deviceData.length > 0)">
+                        <td colspan="7">
+                            No Record Found
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="col-md-12 text-right">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li ng-if="deviceDataPageCount > 1">
+                            <a ng-click="(currPage > 1 && loadPage(1) || true)" aria-label="First" ng-class="{ disabled : currPage <= 1 }"><span aria-hidden="true">&laquo;</span></a>
+                        </li>
+                        <li ng-if="deviceDataPageCount > 1">
+                            <a ng-click="(currPage > 1 && loadPage(currPage - 1) || true)" aria-label="Previous" ng-class="{ disabled : currPage <= 1 }"><span aria-hidden="true">&lsaquo;</span></a>
+                        </li>
+                        <li ng-repeat="n in range(1,deviceDataPageCount)" ng-if="deviceDataPageCount > 1">
+                            <a ng-click="loadPage(n)" ng-if="n!=currPage">{{n}}</a>
+                            <span ng-if="n==currPage">{{n}}</span>
+                        </li>
+                        <li ng-if="deviceDataPageCount > 1">
+                            <a ng-click="(currPage == deviceDataPageCount && true || loadPage(currPage + 1))" ng-class="{ disabled : currPage == deviceDataPageCount }" aria-label="Next"><span aria-hidden="true">&rsaquo;</span></a>
+                        </li>
+                        <li ng-if="deviceDataPageCount > 1">
+                            <a ng-click="(currPage == deviceDataPageCount && true || lastPage())" ng-class="{ disabled : currPage == deviceDataPageCount }" aria-label="Last"><span aria-hidden="true">&raquo;</span></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div id="text-message" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Send Text Message</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group clearfix">
+                    <label for="inputEmail3" class="col-sm-4 control-label">Title</label>
+                    <div class="col-sm-8">
+                        <div class="input-icon right">
+                            <input class="form-control tag-inpt" ng-model="TM_title" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group clearfix">
+                    <label for="inputEmail3" class="col-sm-4 control-label">Description</label>
+                    <div class="col-sm-8">
+                        <div class="input-icon right">
+                            <textarea ng-model="TM_descr" style="width:100%"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="sendTextMessage()"> Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div id="graphic-message" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header" ng-show="IsRecordSelected">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Send Notification</h4>
+            </div>
+            <div class="modal-header" ng-show="!IsRecordSelected" style="background-color: red;">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" style="color: #fff;">Send Notification</h4>
+            </div>
+            <div class="modal-body" ng-if="IsRecordSelected">
+                <div class="form-group clearfix">
+                    <label for="inputEmail3" class="col-sm-3 control-label">Title</label>
+                    <div class="col-sm-9">
+                        <div class="input-icon right">
+                            <input class="form-control tag-inpt" id="push-title" ng-model="GM_title" ng-change="checkPushNotificationValidition()" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group clearfix">
+                    <label for="inputEmail3" class="col-sm-3 control-label">Description</label>
+                    <div class="col-sm-9">
+                        <div class="input-icon right">
+                            <textarea ng-model="GM_descr" id="push-description" style="width:100%" ng-change="checkPushNotificationValidition()"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group clearfix">
+                    <label for="inputEmail3" class="col-sm-3 control-label">Upload Image</label>
+                    <div class="col-sm-9">
+                        <form id="uploadForm" enctype="multipart/form-data" action="/api/photo" method="post">
+                            <input type="file" id="uploadfileinput" name="userPhoto" accept="image/*" />
+                            <input type="submit" value="Upload Image" name="submit" class="btn btn-info btn_set" onclick="return uploadimage(this)">
+                            <img src="#" width="50px" height="50px" id="imagepreview">
+                            <span id="status"></span>
+                        </form>
+                    </div>
+                </div>
+                <small>
+          Note: Please click on Upload button after making Image selection with Browse button if you want to send image notification
+                </small>
+            </div>
+            <div class="modal-body" ng-show="!IsRecordSelected">
+                <h1>Please select atleast one Customer</h1>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info btn_set" data-dismiss="modal" ng-click="sendImageMessage()" ng-if="IsRecordSelected" id="sendpushnotification" disabled="disabled"> Send</button>
+                <button type="button" class="btn btn-info btn_set" data-dismiss="modal" ng-show="IsRecordSelected"> Close </button>
+                <button type="button" class="btn btn-danger btn_set" data-dismiss="modal" ng-show="!IsRecordSelected" style="background-color: red;"> Close </button>
+                <!-- <input type="submit" value="Submit"> -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div id="device-history-detail" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">History of <strong>{{ toProperCase(HistoryPersonName) }}</strong> at <em>{{ HistoryOfPlace }}</em></h4>
+            </div>
+            <div class="modal-body" ng-show="!InitializingHistoryDetails">
+                <!-- ng-show="HistoryDetailsData.length > 0" -->
+                <div class="row">
+                    <!-- <div class="col-xs-4">
+                        <label for="search">Search:</label>
+                        <input ng-model="q" id="search" class="form-control" placeholder="Filter text">
+                    </div> -->
+                    <div class="col-xs-4">
+                        <label for="search">Records/Page:</label>
+                        <select ng-model="deviceHistoryDetailPageSize" class="form-control">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-2" style="margin-top: 10px;">
+                        <small style="margin-top: 10px;" ng-show="HistoryDetailsData.length > 1"><b>{{ (HistoryDetailsData.length) || 0 }} Records</b></small>
+                        <small style="margin-top: 10px;" ng-show="HistoryDetailsData.length == 1"><b>1 Record</b></small>
+                    </div>
+                </div>
+                <div class="form-group clearfix">
+                    <table class="table table-striped" ng-show="HistoryDetailsData.length > 0">
+                        <thead>
+                            <th ng-click="O=(O=='Date' && '-Date' || 'Date' )">Date
+                                <span ng-show="O=='Date'">▲</span><span ng-show="O=='-Date'">▼</span>
+                            </th>
+                            <th ng-click="O=(O=='DateIn' && '-DateIn' || 'DateIn' )">In Time
+                                <span ng-show="O=='DateIn'">▲</span><span ng-show="O=='-DateIn'">▼</span>
+                            </th>
+                            <th ng-click="O=(O=='DateTo' && '-DateTo' || 'DateTo' )">Out Time
+                                <span ng-show="O=='DateTo'">▲</span><span ng-show="O=='-DateTo'">▼</span>
+                            </th>
+                            <th ng-click="O=(O=='StayTime2' && '-StayTime2' || 'StayTime2' )">Stay Time
+                                <span ng-show="O=='StayTime2'">▲</span><span ng-show="O=='-StayTime2'">▼</span>
+                            </th>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="hdd in HistoryDetailsData | filter:q | orderBy : O | itemsPerPage: deviceHistoryDetailPageSize " current-page="deviceHistoryDetailCurrentPage" pagination-id="devicehistory">
+                                <td>{{ hdd.Date | date }}</td>
+                                <td>{{ hdd.DateIn | date:'hh:mm a' }}</td>
+                                <td>{{ hdd.DateTo | date:'hh:mm a' }}</td>
+                                <td>{{ hdd.StayTime }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div>
+                        <nav aria-label="Page navigation">
+                            <div class="text-center">
+                                <dir-pagination-controls boundary-links="true" on-page-change="pageChangeHandler2(newPageNumber)" template-url="app/modules/dashboard/views/dirPagination.tpl.html" pagination-id="devicehistory" current-page="deviceHistoryDetailCurrentPage">
+                                </dir-pagination-controls>
+                            </div>
+                        </nav>
+                    </div>
+                    <table>
+                        <tr ng-show="HistoryDetailsData.length <= 0">
+                            <td colspan="4">
+                                <h4>No Record Found</h4>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-body" ng-show="InitializingHistoryDetails">
+                <h1>Loading History, Please wait...</h1>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal"> Close </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div id="search-history-detail" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Search History of <strong>{{ toProperCase(HistoryPersonName) }}</strong></h4>
+            </div>
+            <div class="modal-body" ng-show="!InitializingHistoryDetails">
+                <div class="row" ng-show="HistorySearchDetailsData.length > 0">
+                    <div class="col-xs-7">
+                        <!-- <label for="search">Search:</label> -->
+                        <label for="search">Search: <small style="color:purple;">(Please enter atleast 2 characters to get results)</small></label>
+                        <input ng-model="q" id="search" ng-change="searchHistoryCurrentPage = 1" class="form-control" placeholder="Filter text">
+                    </div>
+                    <div class="col-xs-3">
+                        <label for="search">Records/Page:</label>
+                        <select ng-model="searchHistoryPageSize" class="form-control">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="30">30</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-2" style="margin-top: 10px;">
+                        <small style="margin-top: 10px;" ng-show="(HistorySearchDetailsData | filter:(q.length > 1 ? { search_keyword : q} : '')).length > 1"><b>{{ ((HistorySearchDetailsData | filter:(q.length > 1 ? { search_keyword : q} : '')).length) || 0 }} Records</b></small>
+                        <small style="margin-top: 10px;" ng-show="(HistorySearchDetailsData | filter:(q.length > 1 ? { search_keyword : q} : '')).length == 1"><b>1 Record</b></small>
+                    </div>
+                </div>
+                <div class="form-group clearfix">
+                    <table class="table table-striped" ng-show="HistorySearchDetailsData.length> 0">
+                        <thead>
+                            <th ng-click="O=(O=='datetimestamp' && '-datetimestamp' || 'datetimestamp' )">Date
+                                <span ng-show="O=='datetimestamp'">▲</span>
+                                <span ng-show="O=='-datetimestamp'">▼</span>
+                            </th>
+                            <th ng-click="O=(O=='search_keyword' && '-search_keyword' || 'search_keyword' )" ">Searched Keyword
+                            <span ng-show="O=='search_keyword' ">▲</span>
+                            <span ng-show="O=='-search_keyword' ">▼</span>
+                            </th>
+                        </thead>
+                        <tbody>
+                                <tr dir-paginate="hdd in HistorySearchDetailsData | filter:(q.length> 1 ? { search_keyword : q} : '') | orderBy : O | itemsPerPage: searchHistoryPageSize" current-page="searchHistoryCurrentPage" pagination-id="searchhistory">
+                                <td>{{ hdd.datetimestamp | date }}</td>
+                                <td>{{ hdd.search_keyword }}</td>
+                                </tr>
+                                </tbody>
+                    </table>
+                    <div class="text-center ">
+                        <dir-pagination-controls boundary-links="true " on-page-change="pageChangeHandler(newPageNumber) " template-url="app/modules/dashboard/views/dirPagination.tpl.html " pagination-id="searchhistory" current-page="searchHistoryCurrentPage"></dir-pagination-controls>
+                    </div>
+                    <table ng-show="HistorySearchDetailsData.length <=0  || !(HistorySearchDetailsData | 
+                                    filter:(q.length > 1 ? { search_keyword : q} : '')).length">
+                        <tbody>
+                            <tr>
+                                <td colspan="4 ">
+                                    <h4>No Record Found</h4>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-body " ng-show="InitializingHistoryDetails ">
+                <h1>Loading Search History, Please wait...</h1>
+            </div>
+            <div class="modal-footer ">
+                <button type="button " class="btn btn-primary " data-dismiss="modal"> Close </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript ">
+$(document).ready(function() {
+    $("#imagepreview ").hide();
+    /*$('#uploadForm').submit(function() {
+        $("#status ").empty().text("Image is uploading... ");
+        $(this).ajaxSubmit({
+
+            error: function(xhr) {
+                status('Error: ' + xhr.status);
+            },
+
+            success: function(response) {
+                if (response != 'Error uploading file.') {
+                    $("#status ").empty();
+                    $("#imagepreview ").attr('src', response);
+                    $("#imagepreview ").show();
+                    var scope = angular.element($("#imagepreview ")).scope();
+                    scope.$apply(function() {
+                        scope.GM_ImageFilePath = response;
+                    });
+                } else {
+                    $("#status ").empty().text(response);
+                    $("#imagepreview ").hide();
+                }
+                console.log(response);
+
+            }
+        });
+        //Very important line, it disable the page refresh.
+        return false;
+    });*/
+});
+
+function uploadimage(object) {
+    var uploadedfile = $('#uploadfileinput').val();
+    if (!uploadedfile) {
+        alert('No file selected.');
+        return false;
+    }
+    $("#status ").empty().text("Image is uploading... ");
+    $('#uploadForm').ajaxSubmit({
+
+        error: function(xhr) {
+            status('Error: ' + xhr.status);
+        },
+
+        success: function(response) {
+            if (response != 'Error uploading file.') {
+                $("#status ").empty();
+                $("#imagepreview ").attr('src', response);
+                $("#imagepreview ").show();
+                var scope = angular.element($("#imagepreview ")).scope();
+                scope.$apply(function() {
+                    scope.GM_ImageFilePath = response;
+                });
+            } else {
+                $("#status ").empty().text(response);
+                $("#imagepreview ").hide();
+            }
+            console.log(response);
+        }
+    });
+    //Very important line, it disable the page refresh.
+    return false;
+}
+</script>

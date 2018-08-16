@@ -1,0 +1,140 @@
+<style>
+.register_block_1 {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    display: inline-block;
+    margin: 2% 2%;
+    padding: 20px;
+    vertical-align: top;
+    width: 34%;
+}
+
+.register_block_2 {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    display: inline-block;
+    margin: 2% 1%;
+    padding: 20px;
+    vertical-align: top;
+    width: 58%;
+}
+
+.content-header {
+    padding: 6% 15px 0;
+    position: relative;
+}
+
+.wait_text {
+    background-color: #d9edf7;
+    border-radius: 3px;
+    color: #31708f;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 10px;
+    font-style: italic;
+    border: 1px solid #bce8f1;
+}
+.error {
+    color: red;
+}
+</style>
+<!--
+Author: Ranjithprabhu K
+Page Description: Dashboard Home page
+Date: 05 Jan 2016
+-->
+<!-- Content Header (Page header) -->
+<div ng-show="!connection" class="alert alert-danger">You're offline now. Please check your internet connection</div>
+<div ng-show="connection_msg" class="alert alert-success">Re-connected successfully</div>
+<section class="content-blocks">
+    <section class="content-header">
+        <h1>
+            Stores
+        </h1>
+        <ol class="breadcrumb">
+            <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+            <li class="active">Stores</li>
+        </ol>
+    </section>
+    <section class="content-body register_block_1" ng-show="loggedInUser.UserType != 2 || button_name == 'Update'">
+        <div class="wait_block" ng-if="!FormInitialized">
+            <p class="wait_text">Please Wait...</p>
+        </div>
+        <h4 ng-if="loggedInUser.UserType == 2">View Beacon</h4>
+        <h4 ng-if="button_name!='Update' && loggedInUser.UserType != 2">Add Stores</h4>
+        <h4 ng-if="button_name=='Update' && loggedInUser.UserType != 2">Update Stores</h4>
+         <ng-form name="storeForm" id="storeForm">
+        <label>Name<span class="error">*</span></label>
+        <input class="form-control" type="text" name="store_name" ng-model="Store_Name" ng-readonly="loggedInUser.UserType==2" required="required" />
+        <span class="error" ng-show="storeForm.store_name.$touched && storeForm.store_name.$invalid">Please Enter Name</span>
+        <br>
+        <label>Latitude<span class="error">*</span></label>
+        <input class="form-control" type="text" name="store_lat" ng-model="Store_Lat" ng-readonly="loggedInUser.UserType==2" required="required" />
+         
+      
+
+            <span class="error" ng-show="storeForm.store_lat.$touched && storeForm.store_lat.$invalid">Please Enter Latitude</span>
+        <br>
+
+        <label>Longitude<span class="error">*</span></label>
+        <input class="form-control" type="text" name="store_long" ng-model="Store_Long" ng-readonly="loggedInUser.UserType==2" required="required" />
+
+         <span class="error" ng-show="storeForm.store_long.$touched && storeForm.store_long.$invalid">Please Enter Longitude</span>
+        <br>
+
+
+        <label>Description</label>
+        <textarea class="form-control" name="store_descr" ng-model="Store_Descr" ng-readonly="loggedInUser.UserType==2"></textarea>
+        <br>
+        <button class="btn btn-primary" ng-bind="button_name" ng-if="loggedInUser.UserType != 2" ng-click="processStore()">Add</button>
+        <!-- <button class="btn btn-primary" ng-if="button_name=='Update' && loggedInUser.UserType != 2" ng-click="deleteStore()">Delete</button> -->
+        <button class="btn btn-primary" ng-if="button_name=='Update' && loggedInUser.UserType != 2" ng-click="resetControls()">Cancel</button>
+        <button class="btn btn-primary" ng-if="loggedInUser.UserType == 2" ng-click="resetControls()">Close</button>
+
+         </ng-form>
+    </section>
+    <section class="content-body register_block_2">
+        <div class="row">
+            <div class="col-xs-5">
+                <h4>Registered Stores</h4>
+            </div>
+        </div>
+        <div class="wait_block" ng-if="!ListInitialized">
+            <p class="wait_text">Please Wait...</p>
+        </div>
+        <div class="wait_block" ng-if="!FormInitialized && loggedInUser.UserType == 2">
+            <p class="wait_text">Please Wait...</p>
+        </div>
+        <!-- Main content -->
+        <table class="table">
+            <tr>
+                <th>Name</th>
+               
+                <th>Latitude</th>
+                <th>Longitude</th>
+               <!--   <th>Description</th> -->
+                <th>Action</th>
+            </tr>
+            <tr ng-repeat="device in storeData | orderBy:StoreName ">
+                <td>
+                    <input class="form-control" type='text' ng-model="device.StoreName" readonly />
+                </td>
+               
+                <td>
+                    <input class="form-control" type='text' ng-model="device.StoreLat" readonly />
+                </td>
+                <td>
+                    <input class="form-control" type='text' ng-model="device.StoreLong" readonly />
+                </td>
+                 <!-- <td>
+                    <input class="form-control" type='text' ng-model="device.StoreDescr" readonly />
+                </td> -->
+                <td ng-click="getStore(device._id)">
+                    <span class="btn btn-primary" ng-if="loggedInUser.UserType == 2">View</span>
+                    <span class="btn btn-primary" ng-if="loggedInUser.UserType != 2">Edit</span>
+                </td>
+            </tr>
+        </table>
+    </section>
+    <!-- /.content -->
+</section>

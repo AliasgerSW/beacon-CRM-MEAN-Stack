@@ -1,0 +1,82 @@
+<style>
+.register_block_1 {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    display: inline-block;
+    margin: 2% 2%;
+    padding: 20px;
+    vertical-align: top;
+    width: 50%;
+}
+
+
+.content-header {
+    padding: 6% 15px 0;
+    position: relative;
+}
+
+.wait_text {
+    background-color: #d9edf7;
+    border-radius: 3px;
+    color: #31708f;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 10px;
+    font-style: italic;
+    border: 1px solid #bce8f1;
+}
+
+.error {
+    color: red;
+}
+</style>
+<!--
+Author: Ranjithprabhu K
+Page Description: Dashboard Home page
+Date: 05 Jan 2016
+-->
+<!-- Content Header (Page header) -->
+<div ng-show="!connection" class="alert alert-danger">You're offline now. Please check your internet connection</div>
+<div ng-show="connection_msg" class="alert alert-success">Re-connected successfully</div>
+<section class="content-blocks">
+    <section class="content-header">
+        <h1>
+            Settings
+        </h1>
+        <ol class="breadcrumb">
+            <!-- <li><a><i class="fa fa-dashboard"></i> Dashboard</a></li> -->
+            <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+            <li class="active">Settings</li>
+        </ol>
+    </section>
+    <section class="content-body register_block_1">
+        <div class="wait_block" ng-if="!FormInitialized">
+            <p class="wait_text">Please Wait...</p>
+        </div>
+        <h4><!-- Update  Setting Data --></h4>
+        <form ng-controller="SettingController"  >
+            <label>GeoFencing Range (In Meters) </label>
+            <input type="number" class="form-control" ng-model="GeoFancingRange" name="GeoFancingRange" ng-readonly='!isEditMode'  />
+            <br>
+            <label>Minimum Stay Time (In Seconds)</label>
+            <input class="form-control" type="number" ng-model="MinStayTimeOfCustomerForEmployee" name="MinStayTimeOfCustomerForEmployee" ng-readonly='!isEditMode' />
+            <br>
+            <label>Customer Welcome Message </label>
+            <textarea class="form-control" ng-model="CustomerWelcomeMessage" name="CustomerWelcomeMessage" ng-readonly='!isEditMode'></textarea>
+            <br>
+            <label>Employee Customer Intimation</label>
+            <textarea class="form-control" ng-model="EmployeeCustomerIntimation" name="EmployeeCustomerIntimation" ng-readonly='!isEditMode'></textarea>
+            <br>
+
+          <b>Note:</b>  Please include <b>«CUSTNAME»</b> for adding/updating message in <b>Customer Welcome Message</b> & <b>Employee Customer Intimation</b>
+          <br>
+          <br>
+            <input type="submit" name="Update" id="Update" class="btn btn-primary" value="Save" 
+                ng-click="processSetting()"  ng-hide="!isEditMode">
+
+                 <input type="submit" name="Update" id="Update" class="btn btn-primary" value="Edit" 
+                ng-click="enableSetting()" ng-hide="isEditMode" >
+        </form>
+    </section>
+    <!-- /.content -->
+</section>

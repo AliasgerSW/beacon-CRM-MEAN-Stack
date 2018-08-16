@@ -1,0 +1,172 @@
+<style>
+.register_block_1 {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    display: inline-block;
+    margin: 2% 2%;
+    padding: 20px;
+    vertical-align: top;
+    width: 25%;
+}
+
+.register_block_2 {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    display: inline-block;
+    margin: 2% 1%;
+    padding: 20px;
+    vertical-align: top;
+    width: 58%;
+}
+
+.content-header {
+    padding: 6% 15px 0;
+    position: relative;
+}
+
+.wait_text {
+    background-color: #d9edf7;
+    border-radius: 3px;
+    color: #31708f;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 10px;
+    font-style: italic;
+    border: 1px solid #bce8f1;
+}
+.error {
+    color: red;
+}
+</style>
+<!--
+Author: Ranjithprabhu K
+Page Description: Dashboard Home page
+Date: 05 Jan 2016
+-->
+<!-- Content Header (Page header) -->
+<div ng-show="!connection" class="alert alert-danger">You're offline now. Please check your internet connection</div>
+<div ng-show="connection_msg" class="alert alert-success">Re-connected successfully</div>
+<section class="content-blocks">
+    <section class="content-header">
+        <h1>
+            Beacons
+        </h1>
+        <ol class="breadcrumb">
+            <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+            <li class="active">Beacons</li>
+        </ol>
+    </section>
+    <section class="content-body register_block_1" ng-show="loggedInUser.UserType != 2 || button_name == 'Update'">
+        <div class="wait_block" ng-if="!FormInitialized">
+            <p class="wait_text">Please Wait...</p>
+        </div>
+        <h4 ng-if="loggedInUser.UserType == 2">View Beacon</h4>
+        <h4 ng-if="button_name!='Update' && loggedInUser.UserType != 2">Add Beacon</h4>
+        <h4 ng-if="button_name=='Update' && loggedInUser.UserType != 2">Update Beacon</h4>
+        <label>Beacon ID<span class="error">*</span></label>
+        <input class="form-control" type="text" name="beacon_id" ng-model="Beacon_ID" ng-readonly="button_name=='Update'" ng-readonly="loggedInUser.UserType==2" />
+        <br>
+        <label>Beacon Key<span class="error">*</span></label>
+        <input class="form-control" type="text" name="beacon_key" ng-model="Beacon_Key" ng-readonly="loggedInUser.UserType==2" />
+        <br>
+        <label>Select Store<span class="error">*</span></label>
+        <select class="form-control col-md-4" ng-model="Beacon_Store" ng-show="loggedInUser.UserType!=2" ng-readonly="loggedInUser.UserType==2">
+            <option value="">Select Store</option>
+            <option ng-repeat="device in storeData | orderBy:StoreName" value="{{device._id}}">{{device.StoreName}}</option>
+        </select>
+        <input class="form-control" ng-show="loggedInUser.UserType==2" type="text" name="Beacon_Store_Name" ng-model="Beacon_Store_Name" ng-readonly="loggedInUser.UserType==2" />
+        <br>
+
+        <label>Description</label>
+        <textarea class="form-control" name="beacon_description" ng-model="Beacon_Descr" ng-readonly="loggedInUser.UserType==2"></textarea>
+        <br>
+        <input class="" type="checkbox" name="beacon_welcome" ng-model="Beacon_Welcome" ng-readonly="loggedInUser.UserType==2" />
+        <label>Is Welcome</label>
+        <br>
+        <button class="btn btn-primary" ng-bind="button_name" ng-if="loggedInUser.UserType != 2" ng-click="processBeacon()">Add</button>
+        <!-- <button class="btn btn-primary" ng-if="button_name=='Update' && loggedInUser.UserType != 2" ng-click="deleteBeacon()">Delete</button> -->
+        <button class="btn btn-primary" ng-if="button_name=='Update' && loggedInUser.UserType != 2" ng-click="resetControls()">Cancel</button>
+        <button class="btn btn-primary" ng-if="loggedInUser.UserType == 2" ng-click="resetControls()">Close</button>
+    </section>
+    <section class="content-body register_block_2">
+        <div class="row">
+            <div class="col-xs-5">
+                <h4>Registered Beacons</h4>
+            </div>
+        </div>
+        <div class="wait_block" ng-if="!ListInitialized">
+            <p class="wait_text">Please Wait...</p>
+        </div>
+        <div class="wait_block" ng-if="!FormInitialized && loggedInUser.UserType == 2">
+            <p class="wait_text">Please Wait...</p>
+        </div>
+        <div class="row">
+            <div class="col-xs-7">
+                <!-- <label for="search">Search:</label> -->
+                <label for="search">Search: <small style="color:purple;">(Please enter atleast 2 characters to get results)</small></label>
+                <input ng-model="q" id="search" class="form-control" placeholder="Filter text" ng-change="beaconCurrentPage=1">
+                <!-- <small style="color:purple;">Please enter atleast 2 characters to get results</small> -->
+            </div>
+            <div class="col-xs-3">
+                <label for="search">Records/Page:</label>
+                <select ng-model="beaconPageSize" class="form-control">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-2" style="margin-top: 10px;">
+                <small style="margin-top: 10px;" ng-show="(beaconData | filter: (q.length > 1 ? q : '')).length > 1"><b>{{ (beaconData | filter: (q.length > 1 ? q : '')).length || 0 }} Records</b></small>
+                <small style="margin-top: 10px;" ng-show="(beaconData | filter: (q.length > 1 ? q : '')).length == 1"><b>1 Record</b></small>
+            </div>
+        </div>
+        <!-- Main content -->
+        <table class="table">
+            <tr>
+                <th ng-click="O=(O=='BeaconID' && '-BeaconID' || 'BeaconID' )">
+                    Beacon ID
+                    <span ng-show="O=='BeaconID'">▲</span>
+                    <span ng-show="O=='-BeaconID'">▼</span>
+                </th>
+                <th ng-click="O=(O=='BeaconKey' && '-BeaconKey' || 'BeaconKey' )">Beacon Key
+                    <span ng-show="O=='BeaconKey'">▲</span>
+                    <span ng-show="O=='-BeaconKey'">▼</span>
+                </th>
+                <th ng-click="O=(O=='StoreName' && '-StoreName' || 'StoreName' )">Store Name
+                    <span ng-show="O=='StoreName'">▲</span>
+                    <span ng-show="O=='-StoreName'">▼</span>
+                </th>
+                <th>Action</th>
+            </tr>
+            <tr dir-paginate="device in beaconData | filter: (q.length > 1 ? q : '') | orderBy : O | itemsPerPage:  beaconPageSize" current-page="beaconCurrentPage">
+                <!-- <tr ng-repeat="device in beaconData | orderBy:BeaconKey "> -->
+                <td>
+                    <input class="form-control" type='text' ng-model="device.BeaconID" readonly />
+                </td>
+                <td>
+                    <input class="form-control" type='text' ng-model="device.BeaconKey" readonly />
+                </td>
+                <td>
+                    <input class="form-control" type='text' ng-model="device.StoreName" readonly />
+                </td>
+                <td ng-click="getBeacon(device.BeaconID)">
+                    <span class="btn btn-primary" ng-if="loggedInUser.UserType == 2">View</span>
+                    <span class="btn btn-primary" ng-if="loggedInUser.UserType != 2">Edit</span>
+                </td>
+            </tr>
+            <tr ng-show="!(beaconData | filter: (q.length > 1 ? q : '')).length">
+                <td colspan="4">No Record Found</td>
+            </tr>
+        </table>
+        <div>
+            <nav aria-label="Page navigation">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="app/modules/dashboard/views/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </nav>
+        </div>
+    </section>
+    <!-- /.content -->
+</section>

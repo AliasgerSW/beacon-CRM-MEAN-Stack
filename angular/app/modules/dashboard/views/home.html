@@ -1,0 +1,154 @@
+﻿<style type="text/css">
+.btn.btn-info.btn-circle {
+    border-radius: 25px;
+    margin-bottom: 5px;
+}
+</style>
+<!--
+Author: Ranjithprabhu K
+Page Description: Dashboard Home page
+Date: 05 Jan 2016
+-->
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>Dashboard</h1>
+    <ol class="breadcrumb">
+        <li><i class="fa fa-dashboard"></i> Dashboard</li>
+        <!-- <li class="active">Home</li> -->
+    </ol>
+</section>
+<!-- Main content -->
+<section class="content">
+    <!-- Info boxes -->
+    <div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-12" data-ng-repeat="data in vm.home.mainData">
+            <div class="info-box">
+                <span class="info-box-icon bg-{{data.theme}}"><i class="fa fa-{{data.icon}}"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">{{data.title}}</span>
+                    <span class="info-box-number">{{data.value}}</span>
+                </div>
+                <!-- /.info-box-content -->
+            </div>
+            <!-- /.info-box -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+    <!-- <div class="row">
+        <div class="col-md-12">
+            <h1>Welcome to Beacons Dashboard</h1>
+        </div>
+    </div> -->
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="pull-right">
+                <button type="button" class="btn btn-info btn-circle" title="Refresh" ng-click="refreshDashboard()"><i class="fa fa-refresh"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="box box-success">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Store(s) </h3>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body" ng-show="!StoreInitialized">
+                    Data Loading...
+                </div>
+                <div class="box-body" ng-show="StoreInitialized">
+                    <div ng-repeat="store in storelist">
+                        <strong>
+                        <span class="pull-right">{{ store.NoOfMobiles }} Users</span>
+                        <i class="fa fa-empire margin-r-5"></i>
+                        <span> {{ store.StoreName }}</span></strong>
+                        <hr>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+                <div class="box-body" ng-show="StoreInitialized">
+                    <canvas id="pie" class="chart chart-pie" chart-data="data" chart-labels="labels" chart-options="options">
+                    </canvas>
+                </div>
+            </div>
+            <!-- /.box -->
+            <!-- <div class="box box-success" ng-show="data.length > 1">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Stores Users Analytics</h3>
+                </div>
+                <div class="box-body" ng-show="!StoreInitialized">
+                    Data Loading...
+                </div>
+                
+            </div> -->
+        </div>
+        <div class="col-md-8">
+            <div class="box box-success">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Recent Notifications</h3>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body" ng-show="!NotifInitialized">
+                    Data Loading...
+                </div>
+                <div class="box-body table-responsive" ng-show="NotifInitialized">
+                    <table class="table table-striped">
+                        <thead class="thead-default">
+                            <tr>
+                                <th>
+                                    Time
+                                </th>
+                                <th>
+                                    Mobile Number
+                                </th>
+                                <th>
+                                    Title
+                                </th>
+                                <th>
+                                    Description
+                                </th>
+                                <th>
+                                    Image
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="notif in notiflist" ng-show="notiflist.length > 0">
+                                <td>
+                                    {{ notif.notification_date | date:'dd/MM/yyyy hh:mm a' }}
+                                </td>
+                                <td>
+                                    {{ notif.mobile_no }}
+                                </td>
+                                <td>
+                                    {{ notif.heading }}
+                                </td>
+                                <td>
+                                    {{ notif.notification_message }}
+                                </td>
+                                <td ng-if="!notif.notification_img || notif.notification_img == '#'">
+                                    <img src="/images/home/No_Image_Available.png" width="50" height="50" alt="Sorry! Image may be corrupted or deleted">
+                                </td>
+                                <td ng-if="notif.notification_img && notif.notification_img != '#'">
+                                    <img src="{{ baseUrl + '/' + notif.notification_img}}" width="50" height="50" alt="Sorry! Image may be corrupted or deleted" onerror="if (this.src != '/images/home/No_Image_Available.png') this.src = '/images/home/No_Image_Available.png';">
+                                </td>
+                            </tr>
+                            <tr ng-show="notiflist.length <= 0">
+                                <td colspan="5">No Record Found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="text-center" ng-show="notiflist.length > 9">
+                        <a class="btn btn-info" ui-sref="app.notifications">View More</a>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+    </div>
+</section>
+<!-- /.content -->
